@@ -17,10 +17,21 @@ def part_two(ids):
             return same
 
 
+def part_two_alt(ids):
+    min_len = min(map(len, ids))
+    for i in range(min_len):
+        seen = set()
+        for x in ids:
+            spliced = x[:i] + x[i + 1:]
+            if spliced in seen:
+                return spliced
+            seen.add(spliced)
+
+
 if __name__ == '__main__':
     fn, = sys.argv[1:]
     with open(fn) as f:
         ids = [x.strip() for x in f]
 
     print(part_one(ids))
-    print(part_two(ids))
+    print(part_two_alt(ids))
