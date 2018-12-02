@@ -6,8 +6,8 @@ from itertools import combinations
 def part_one(ids):
     counts = (Counter(x).values() for x in ids)
     present = ((2 in c, 3 in c) for c in counts)
-    two, three = zip(*present)
-    return sum(two) * sum(three)
+    two, three = map(sum, zip(*present))
+    return two * three
 
 
 def part_two(ids):
