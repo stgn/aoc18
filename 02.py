@@ -4,7 +4,7 @@ from itertools import combinations
 
 
 def part_one(ids):
-    counts = (Counter(x).values() for x in ids)
+    counts = (set(Counter(x).values()) for x in ids)
     present = ((2 in c, 3 in c) for c in counts)
     two, three = map(sum, zip(*present))
     return two * three
