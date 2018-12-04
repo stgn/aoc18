@@ -1,58 +1,69 @@
 import sys
 import re
 import numpy as np
-from collections import defaultdict, namedtuple
-from operator import attrgetter
+from collections import defaultdict
+from dataclasses import dataclass
+from datetime import datetime
 
-Stats = namedtuple('Stats', ('guard_id', 'spent_asleep', 
-                             'mostly_at', 'mostly_value'))
-record_pattern = re.compile(r'\[(\d+)-(\d+)-(\d+) (\d+):(\d+)\] (.+)')
-switch_pattern = re.compile(r'Guard #(\d+) begins shift')
-
-
-def parse_record(record_str):
-    m = record_pattern.match(record_str)
-    *time, action = m.groups()
-    return tuple(map(int, time)), action
+record_pattern = re.compile(r'\[(\d+-\d+-\d+ \d+:\d+)\] (.+)')
+switch_pattern = re.compile(r'Guard #(?P<new_guard_id>\d+) begins shift')
 
 
-def get_stats(item):
-    guard_id, schedule = item
-    spent_asleep = np.sum(schedule)
-    mostly_at = np.argmax(schedule)
-    mostly_value = schedule[mostly_at]
-    return Stats(guard_id, spent_asleep, mostly_at, mostly_value)
+@dataclass(frozen=True, order=True)
+class Record:
+    timestamp: datetime
+    action: str
+
+    @classmethod
+    def from_str(cls, record_str):
+        m = record_pattern.match(record_str)
+        ts_str, action = m.groups()
+        return cls(datetime.fromisoformat(ts_str), action)
+
+
+@dataclass(frozen=True)
+class Stats:
+    spent_asleep: int
+    mostly_at: int
+    mostly_observations: int
+
+    @classmethod
+    def from_schedule(cls, schedule):
+        spent_asleep = np.sum(schedule)
+        mostly_at = np.argmax(schedule)
+        mostly_observations = schedule[mostly_at]
+        return cls(spent_asleep, mostly_at, mostly_observations)
 
 
 def part_one(stats):
-    x = max(stats, key=attrgetter('spent_asleep'))
-    return x.guard_id * x.mostly_at
+    guard_id = max(stats, key=lambda k: stats[k].spent_asleep)
+    return guard_id * stats[guard_id].mostly_at
 
 
 def part_two(stats):
-    x = max(stats, key=attrgetter('mostly_value'))
-    return x.guard_id * x.mostly_at
+    guard_id = max(stats, key=lambda k: stats[k].mostly_observations)
+    return guard_id * stats[guard_id].mostly_at
 
 
 if __name__ == '__main__':
     fn, = sys.argv[1:]
     with open(fn) as f:
-        records = sorted(map(parse_record, f))
+        records = sorted(map(Record.from_str, f))
 
     schedules = defaultdict(lambda: np.zeros(60, dtype=np.uint8))
     guard_id, sleep_began = None, None
-    for time, action in records:
-        *_, minute = time 
-        switch = switch_pattern.match(action)
+    for r in records:
+        minute = r.timestamp.minute 
+        switch = switch_pattern.match(r.action)
 
         if switch:
-            guard_id = int(switch[1])
-        elif action == 'falls asleep':
+            guard_id = int(switch['new_guard_id'])
+        elif r.action == 'falls asleep':
             sleep_began = minute
-        elif action == 'wakes up':
+        elif r.action == 'wakes up':
             schedule = schedules[guard_id]
             schedule[sleep_began:minute] += 1
 
-    stats = list(map(get_stats, schedules.items()))
+    stats = {k: Stats.from_schedule(v) for k, v in schedules.items()}
     print(part_one(stats))
     print(part_two(stats))

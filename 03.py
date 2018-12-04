@@ -1,16 +1,22 @@
 import sys
 import re
 import numpy as np
-from collections import namedtuple
+from dataclasses import dataclass
 
-pattern = re.compile(r'#(\d+) @ (\d+),(\d+): (\d+)x(\d+)')
-Claim = namedtuple('Claim', ('id_', 'x1', 'y1', 'x2', 'y2'))
+claim_pattern = re.compile(r'#(\d+) @ (\d+),(\d+): (\d+)x(\d+)')
 
 
-def parse_claim(claim_str):
-    m = pattern.match(claim_str)
-    id_, x, y, w, h = map(int, m.groups())
-    return Claim(id_, x, y, x + w, y + h)
+@dataclass(frozen=True)
+class Claim:
+    id_: int
+    x1: int; y1: int
+    x2: int; y2: int
+
+    @classmethod
+    def from_str(cls, claim_str):
+        m = claim_pattern.match(claim_str)
+        id_, x, y, w, h = map(int, m.groups())
+        return cls(id_, x, y, x + w, y + h)
 
 
 def part_one(fabric):
@@ -27,7 +33,7 @@ def part_two(fabric, claims):
 if __name__ == '__main__':
     fn, = sys.argv[1:]
     with open(fn) as f:
-        claims = list(map(parse_claim, f))
+        claims = list(map(Claim.from_str, f))
 
     fw = max(c.x2 for c in claims)
     fh = max(c.y2 for c in claims)
