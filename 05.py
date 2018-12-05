@@ -4,23 +4,16 @@ import string
 
 def react(polymer, ignore=None):
     if ignore:
-        ignore = ord(ignore)
+        fn = lambda x: x.lower() != ignore
+        polymer = filter(fn, polymer)
 
     stack = []
 
-    for u in map(ord, polymer):
-        if u | 32 == ignore:  # u.lower()
-            continue
-
-        annihilate = False
-        if stack:
-            top = stack[-1]
-            annihilate = u ^ 32 == top  # u.swapcase()
-
-        if annihilate:
+    for x in polymer:
+        if stack and x.swapcase() == stack[-1]:
             stack.pop()
         else:
-            stack.append(u)
+            stack.append(x)
 
     return len(stack)
 
