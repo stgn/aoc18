@@ -1,4 +1,4 @@
-import sys
+import fileinput
 import re
 import numpy as np
 from dataclasses import dataclass
@@ -31,8 +31,7 @@ def part_two(fabric, claims):
 
 
 if __name__ == '__main__':
-    fn, = sys.argv[1:]
-    with open(fn) as f:
+    with fileinput.input() as f:
         claims = list(map(Claim.from_str, f))
 
     fw = max(c.x2 for c in claims)

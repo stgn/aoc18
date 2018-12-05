@@ -1,4 +1,4 @@
-import sys
+import fileinput
 from itertools import cycle
 
 
@@ -13,9 +13,8 @@ def part_two(deltas):
 
 
 if __name__ == '__main__':
-    fn, = sys.argv[1:]
-    with open(fn) as f:
-        deltas = [int(x) for x in f]
+    with fileinput.input() as f:
+        deltas = list(map(int, f))
 
     print(sum(deltas))
     print(part_two(deltas))

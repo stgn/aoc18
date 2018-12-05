@@ -1,4 +1,4 @@
-import sys
+import fileinput
 from collections import Counter
 from itertools import combinations
 
@@ -10,14 +10,14 @@ def part_one(ids):
     return two * three
 
 
-def part_two(ids):
+def part_two_old(ids):
     for a, b in combinations(ids, 2):
         same = ''.join(x for x, y in zip(a, b) if x == y)
         if len(same) == len(a) - 1:
             return same
 
 
-def part_two_alt(ids):
+def part_two(ids):
     min_len = min(map(len, ids))
     for i in range(min_len):
         seen = set()
@@ -29,9 +29,8 @@ def part_two_alt(ids):
 
 
 if __name__ == '__main__':
-    fn, = sys.argv[1:]
-    with open(fn) as f:
+    with fileinput.input() as f:
         ids = [x.strip() for x in f]
 
     print(part_one(ids))
-    print(part_two_alt(ids))
+    print(part_two(ids))

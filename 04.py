@@ -1,4 +1,4 @@
-import sys
+import fileinput
 import re
 import numpy as np
 from collections import defaultdict
@@ -46,8 +46,7 @@ def part_two(stats):
 
 
 if __name__ == '__main__':
-    fn, = sys.argv[1:]
-    with open(fn) as f:
+    with fileinput.input() as f:
         records = sorted(map(Record.from_str, f))
 
     schedules = defaultdict(lambda: np.zeros(60, dtype=np.uint8))
