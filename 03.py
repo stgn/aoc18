@@ -9,8 +9,10 @@ claim_pattern = re.compile(r'#(\d+) @ (\d+),(\d+): (\d+)x(\d+)')
 @dataclass(frozen=True)
 class Claim:
     id_: int
-    x1: int; y1: int
-    x2: int; y2: int
+    left: int
+    top: int
+    right: int
+    bottom: int
 
     @classmethod
     def from_str(cls, claim_str):
@@ -25,7 +27,7 @@ def part_one(fabric):
 
 def part_two(fabric, claims):
     for c in claims:
-        patch = fabric[c.x1:c.x2, c.y1:c.y2]
+        patch = fabric[c.left:c.right, c.top:c.bottom]
         if (patch == 1).all():
             return c.id_
 
@@ -34,12 +36,12 @@ if __name__ == '__main__':
     with fileinput.input() as f:
         claims = list(map(Claim.from_str, f))
 
-    fw = max(c.x2 for c in claims)
-    fh = max(c.y2 for c in claims)
+    fw = max(c.right for c in claims)
+    fh = max(c.bottom for c in claims)
     fabric = np.zeros((fw, fh), dtype=np.uint16)
 
     for c in claims:
-        fabric[c.x1:c.x2, c.y1:c.y2] += 1
+        fabric[c.left:c.right, c.top:c.bottom] += 1
 
     print(part_one(fabric))
     print(part_two(fabric, claims))

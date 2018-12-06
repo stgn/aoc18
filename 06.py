@@ -14,7 +14,7 @@ def _inclusify(r):
 
 
 def ndrange(*ranges, inclusive=False):
-    ranges = ((r,) if isinstance(r, int) else r 
+    ranges = ((r,) if isinstance(r, int) else r
               for r in ranges)
     if inclusive:
         ranges = map(_inclusify, ranges)
@@ -53,7 +53,7 @@ if __name__ == '__main__':
                 min_dist = dist
             elif dist == min_dist:
                 min_coord = None
-                
+
         if x in x_range or y in y_range:
             infinites.add(min_coord)
         elif min_coord not in infinites:

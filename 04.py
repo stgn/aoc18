@@ -52,7 +52,7 @@ if __name__ == '__main__':
     schedules = defaultdict(lambda: np.zeros(60, dtype=np.uint8))
     guard_id, sleep_began = None, None
     for r in records:
-        minute = r.timestamp.minute 
+        minute = r.timestamp.minute
         switch = switch_pattern.match(r.action)
 
         if switch:
