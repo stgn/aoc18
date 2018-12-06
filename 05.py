@@ -2,24 +2,24 @@ import fileinput
 import string
 
 
-def react(polymer, ignore=None):
-    if ignore:
-        fn = lambda x: x.lower() != ignore
-        polymer = filter(fn, polymer)
-
+def react(polymer):
     stack = []
-
     for x in polymer:
         if stack and x.swapcase() == stack[-1]:
             stack.pop()
         else:
             stack.append(x)
-
     return len(stack)
 
 
+def make_unit_filter(unit):
+    return lambda x: x.lower() != unit
+
+
 def part_two(polymer):
-    return min(react(polymer, c) for c in string.ascii_lowercase)
+    filters = map(make_unit_filter, string.ascii_lowercase)
+    polymers = (filter(f, polymer) for f in filters)
+    return min(react(p) for p in polymers)
 
 
 if __name__ == '__main__':
