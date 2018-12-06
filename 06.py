@@ -5,20 +5,19 @@ from itertools import starmap, product
 SAFE_THRESHOLD = 10000
 
 
-def _inclusify(r):
-    if len(r) == 1:
-        stop, = r
-        return (stop + 1,)
-    start, stop, *step = r
-    return (start, stop + 1, *step)
+def irange(*args):
+    if len(args) == 1:
+        stop, = args
+        return range(stop + 1)
+    start, stop, *step = args
+    return range(start, stop + 1, *step)
 
 
 def ndrange(*ranges, inclusive=False):
     ranges = ((r,) if isinstance(r, int) else r
               for r in ranges)
-    if inclusive:
-        ranges = map(_inclusify, ranges)
-    yield from product(*starmap(range, ranges))
+    range_fn = irange if inclusive else range
+    yield from product(*starmap(range_fn, ranges))
 
 
 def part_one(coord_areas):
