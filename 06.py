@@ -43,11 +43,11 @@ if __name__ == '__main__':
         min_dist = min_coord = None
         sum_dist = 0
 
-        for i, (a, b) in enumerate(coords):
+        for a, b in coords:
             dist = abs(a - x) + abs(b - y)
             sum_dist += dist
 
-            if not min_dist or dist < min_dist:
+            if min_dist is None or dist < min_dist:
                 min_coord = a, b
                 min_dist = dist
             elif dist == min_dist:
