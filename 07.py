@@ -1,6 +1,7 @@
 import fileinput
 import heapq
 from collections import defaultdict
+from dataclasses import dataclass
 
 
 class Scheduler:
@@ -35,6 +36,12 @@ class Scheduler:
         return all(x == 0 for x in self.prereqs.values())
 
 
+@dataclass(frozen=True, order=True)
+class Task:
+    eta: int
+    step: str
+
+
 def part_one(rules):
     ordered = []
     scheduler = Scheduler(rules)
@@ -45,31 +52,27 @@ def part_one(rules):
     return ''.join(ordered)
 
 
-def part_two(rules, num_workers=5):
+def part_two(rules, max_tasks=5):
     scheduler = Scheduler(rules)
-    workers = [(None, 0)] * num_workers
+    tasks = []
 
     time = 0
     while True:
-        for i, (step, eta) in enumerate(workers):
-            if not step or time < eta:
-                continue
-            scheduler.complete(step)
-            workers[i] = None, 0
+        while tasks and time >= tasks[0].eta:
+            t = heapq.heappop(tasks)
+            scheduler.complete(t.step)
 
         if scheduler.has_work():
-            for i, (step, _) in enumerate(workers):
-                if step:
-                    continue
+            while len(tasks) < max_tasks:
                 new_step = scheduler.get()
                 if new_step is None:
                     break
                 eta = time + ord(new_step) - 64 + 60
-                workers[i] = new_step, eta
+                heapq.heappush(tasks, Task(eta, new_step))
         elif scheduler.exhausted():
             return time
 
-        time = min(eta for task, eta in workers if task)
+        time = tasks[0].eta
 
 
 if __name__ == '__main__':
