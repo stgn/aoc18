@@ -3,75 +3,73 @@ import heapq
 from collections import defaultdict
 
 
-def toporder(adjacency):
-    indegree = defaultdict(int)
-    for u, adjacents in adjacency.items():
-        indegree[u]
-        for v in adjacents:
-            indegree[v] += 1
-    
-    queue = [u for u, d in indegree.items() if not d]
-    heapq.heapify(queue)
+class Scheduler:
+    def __init__(self, rules):
+        self.rules = rules
 
-    while queue or sum(indegree.values()):
-        u = yield heapq.heappop(queue) if queue else None
-        if not u:
-            continue
-        for v in adjacency[u]:
-            indegree[v] -= 1
-            if not indegree[v]:
-                heapq.heappush(queue, v)
+        self.prereqs = defaultdict(int)
+        for step, dependents in rules.items():
+            self.prereqs[step]
+            for d in dependents:
+                self.prereqs[d] += 1
 
+        self.queue = [s for s, c in self.prereqs.items() if not c]
+        heapq.heapify(self.queue)
 
-def topsort(rules):
-    g = toporder(rules)
-    last = None
-    while True:
-        try:
-            last = g.send(last)
-            yield last
-        except StopIteration:
-            break
+    def get(self):
+        if self.queue:
+            return heapq.heappop(self.queue)
+
+    def complete(self, step):
+        if not step:
+            return
+        for d in self.rules[step]:
+            self.prereqs[d] -= 1
+            if not self.prereqs[d]:
+                heapq.heappush(self.queue, d)
+
+    def has_work(self):
+        return bool(self.queue)
+
+    def exhausted(self):
+        return all(x == 0 for x in self.prereqs.values())
 
 
 def part_one(rules):
-    return ''.join(topsort(rules))
+    ordered = []
+    scheduler = Scheduler(rules)
+    while scheduler.has_work():
+        step = scheduler.get()
+        ordered.append(step)
+        scheduler.complete(step)
+    return ''.join(ordered)
 
 
-def part_two(rules):
-    scheduler = toporder(rules)
-    more_tasks = True
-    workers = [(None, 0)] * 5
-    notify = []
+def part_two(rules, num_workers=5):
+    scheduler = Scheduler(rules)
+    workers = [(None, 0)] * num_workers
+
     time = 0
-
     while True:
-        for i, (task, eta) in enumerate(workers):
-            if not task or time < eta:
+        for i, (step, eta) in enumerate(workers):
+            if not step or time < eta:
                 continue
-            notify.append(task)
+            scheduler.complete(step)
             workers[i] = None, 0
 
-        if more_tasks:
-            for i, (task, _) in enumerate(workers):
-                if task:
+        if scheduler.has_work():
+            for i, (step, _) in enumerate(workers):
+                if step:
                     continue
-                try:
-                    completed_task = notify.pop() if notify else None
-                    new_task = scheduler.send(completed_task)
-                    if not new_task:
-                        break
-                    eta = time + ord(new_task) - 64 + 60
-                    workers[i] = new_task, eta
-                except StopIteration:
-                    more_tasks = False
+                new_step = scheduler.get()
+                if new_step is None:
                     break
-        elif all(not task for task, _ in workers):
-            break
+                eta = time + ord(new_step) - 64 + 60
+                workers[i] = new_step, eta
+        elif scheduler.exhausted():
+            return time
 
-        time += 1
-
-    return time
+        time = min(eta for task, eta in workers if task)
 
 
 if __name__ == '__main__':
