@@ -34,7 +34,7 @@ if __name__ == '__main__':
     with fileinput.input() as f:
         line = f.readline()
         data = map(int, line.split())
-        node = Node.parse_from(data) 
+        node = Node.parse_from(data)
 
     print(part_one(node))
     print(part_two(node))
