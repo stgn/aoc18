@@ -42,3 +42,14 @@ I originally solved this by calculating the bounding box at each time step and c
 Thus, you can find the time it takes an image to form without stepping through time by simply solving `m * t + h = 10` for `t`, where `m` is the rate of change for the height of the bounding box, and `h` is the initial height of the bounding box. `m` is equal to the minimum Y velocity of all points minus the maximum.
 
 Once you have found `t`, for each point, simply add its velocity multiplied by `t` to its position to form the image.
+
+
+## Day 11
+
+There are a few approaches you can use for finding the sums for each NxN window in the grid. My solution has used the following:
+
+1. `scipy.signal.convolve2d` with increasing kernel sizes. This is what I originally used to find my answers, but it is very slow and becomes much slower as the window size increases.
+1. A [summed-area table](https://en.wikipedia.org/wiki/Summed-area_table). This works in constant time with regards to the window size.
+1. A sliding window sum of sliding window sums, which also works in constant time.
+
+The sliding window approach runs approximately three times faster than the summed-area table one, despite requiring the same number of arithmetic operations per window sum. Why? I'm not sure yet. Greater data locality, fewer branches, or less Python overhead?
