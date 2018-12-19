@@ -23,7 +23,7 @@ def flow(clay, bottom):
 
     def traverse(p):
         if p in moving:
-            return False
+            return
 
         moving.add(p)
 
@@ -74,10 +74,7 @@ if __name__ == '__main__':
 
     for o, a, b, c in lines:
         for x in range(b, c + 1):
-            if o == Axis.Y:
-                p = (x, a)
-            else:
-                p = (a, x)
+            p = (x, a) if o == Axis.Y else (a, x)
             clay.add(p)
 
     still, moving = flow(clay, bottom)

@@ -41,7 +41,7 @@ if __name__ == '__main__':
     falling = max(p.vy for p in pts)
 
     dt = (bottom - top - 9) // (falling - rising)
-    
+
     for p in pts:
         p.px += p.vx * dt
         p.py += p.vy * dt
