@@ -16,7 +16,29 @@ def get_cell(state, y, x):
     return Cell.OPEN
 
 
-def simulate(init_state, generations):
+def precalc_rules():
+    rules = {}
+
+    for neighborhood in product(Cell, repeat=9):
+        center = neighborhood[4]
+        count = Counter(neighborhood)
+        count[center] -= 1
+        num_trees = count[Cell.TREES]
+        num_yards = count[Cell.YARD]
+
+        if center == Cell.OPEN and num_trees >= 3:
+            rules[neighborhood] = Cell.TREES
+
+        if center == Cell.TREES and num_yards >= 3:
+            rules[neighborhood] = Cell.YARD
+
+        if center == Cell.YARD and 0 in (num_yards, num_trees):
+            rules[neighborhood] = Cell.OPEN
+
+    return rules
+
+
+def simulate(rules, init_state, generations):
     seen = {}
     cached_counts = []
     state = init_state
@@ -27,25 +49,11 @@ def simulate(init_state, generations):
 
         for y, x in product(range(50), range(50)):
             adj = ((y - 1, x - 1), (y - 1, x), (y - 1, x + 1),
-                   (y, x - 1), (y, x + 1),
+                   (y,     x - 1), (y,     x), (y,     x + 1),
                    (y + 1, x - 1), (y + 1, x), (y + 1, x + 1))
-            cur = state[y * 50 + x]
-            adj_count = Counter(get_cell(state, *n) for n in adj)
-
-            new = cur
-            num_trees = adj_count[Cell.TREES]
-            num_yards = adj_count[Cell.YARD]
-
-            if cur == Cell.OPEN and num_trees >= 3:
-                new = Cell.TREES
-
-            if cur == Cell.TREES and num_yards >= 3:
-                new = Cell.YARD
-
-            if cur == Cell.YARD and 0 in (num_yards, num_trees):
-                new = Cell.OPEN
-
-            new_state[y * 50 + x] = new
+            neighborhood = tuple(get_cell(state, *n) for n in adj)
+            center = neighborhood[4]
+            new_state[y * 50 + x] = rules.get(neighborhood, center)
 
         state = tuple(new_state)
 
@@ -72,5 +80,7 @@ if __name__ == '__main__':
             cell = Cell.YARD if ch == '#' else Cell.TREES
             state[y * 50 + x] = cell
 
-    print(simulate(state, 10))
-    print(simulate(state, 1_000_000_000))
+    rules = precalc_rules()
+
+    print(simulate(rules, state, 10))
+    print(simulate(rules, state, 1_000_000_000))
