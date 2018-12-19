@@ -53,3 +53,38 @@ There are a few approaches you can use for finding the sums for each NxN window 
 1. A sliding window sum of sliding window sums, which also works in constant time.
 
 The sliding window approach runs approximately three times faster than the summed-area table one, despite requiring the same number of arithmetic operations per window sum. Why? I'm not sure yet. Greater data locality, fewer branches, or less Python overhead?
+
+
+## Day 15
+
+This problem posed some interesting optimization opportunities for me. I managed to get the Part 1 run time down from 16 seconds to less than a second with the following changes:
+
+- Storing walls in a set rather than a NumPy array. It turns out accessing a single element of a NumPy array is really slow. This cut the run time in half.
+- Using a `typing.NamedTuple` for `Vec2` rather than a dataclass. There are probably a few reasons why it's faster, with native hashing probably being the biggest contributor. This also cut the run time in half.
+- Storing the Y coordinate first in `Vec2`. This allows us to sort in "reading order" natively, i.e. without a custom `__lt__` method or key function in Python.
+- Not traversing through the rest of the grid as soon as a path to a target is found. Pretty much a no-brainer.
+- Preconstructing a tuple of `Vec2` neighbor offsets.
+
+
+## Day 19
+
+The solution provided does not solve Part 2. You could write a just-in-time compiler and it still probably wouldn't solve in a reasonable amount of time. The point is to analyze the input program, figure out what it does, and find the answer in some more efficient manner. After analyzing and translating the main loop of the program to Python, I ended up with this:
+
+```python
+n = ...
+result = 0
+for outer in range(1, n + 1):
+    for inner in range(1, n + 1):
+        if outer * inner == n:
+            result += outer
+```
+
+In other words, it's an incredibly inefficient (i.e. runs in quadratic time) algorithm for summing the factors of `n`. I didn't analyze the code that initializes `n`; I just observed the value in the register that holds it instead. For Part 1, `n` is small enough (848) to be solved in a few seconds. Part 2 requires you to set the first register to `1`, which results in a much larger `n` (10551298). I actually ended up using WolframAlpha to find my answer for Part 2, but for the sake of completeness, you can also solve it more efficiently like so:
+
+```python
+for i in range(1, int(sqrt(n + 1))):
+    q, r = divmod(n, i)
+    if r == 0:
+        result += i
+        result += q
+```
