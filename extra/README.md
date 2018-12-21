@@ -82,9 +82,8 @@ for outer in range(1, n + 1):
 In other words, it's an incredibly inefficient (i.e. runs in quadratic time) algorithm for summing the factors of `n`. I didn't analyze the code that initializes `n`; I just observed the value in the register that holds it instead. For Part 1, `n` is small enough (848) to be solved in a few seconds. Part 2 requires you to set the first register to `1`, which results in a much larger `n` (10551298). I actually ended up using WolframAlpha to find my answer for Part 2, but for the sake of completeness, you can also solve it more efficiently like so:
 
 ```python
-for i in range(1, int(sqrt(n + 1))):
+for i in range(1, int(sqrt(n)) + 1):
     q, r = divmod(n, i)
     if r == 0:
-        result += i
-        result += q
+        result += i + (i != q and q)
 ```
